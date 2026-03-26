@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'app/router.dart';
+import 'core/models/story.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialisation Hive
   await Hive.initFlutter();
-  // On enregistrera l'adaptateur de Story plus tard quand il sera généré
-  // Hive.registerAdapter(StoryAdapter());
+  
+  // Enregistrement de l'adaptateur généré
+  Hive.registerAdapter(StoryAdapter());
+  
+  // Ouverture de la boîte pour stocker les histoires
+  await Hive.openBox<Story>('stories');
   
   runApp(
     const ProviderScope(

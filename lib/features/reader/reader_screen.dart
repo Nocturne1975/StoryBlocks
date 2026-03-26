@@ -2,22 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/models/story.dart';
 import '../../core/story_engine/story_generator.dart';
 import '../builder/builder_provider.dart';
+import '../stories/stories_provider.dart';
 
-class ReaderScreen extends ConsumerWidget {
+class ReaderScreen extends ConsumerStatefulWidget {
   const ReaderScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReaderScreen> createState() => _ReaderScreenState();
+}
+
+class _ReaderScreenState extends ConsumerState<ReaderScreen> {
+  String? _currentTitle;
+  String? _currentContent;
+
+  void _generateStory() {
+    final builderState = ref.read(builderProvider);
+    setState(() {
+      _currentTitle = StoryGenerator.generateTitle(builderState.selectedBlocks);
+      _currentContent = StoryGenerator.generate(
+        selectedBlocks: builderState.selectedBlocks,
+        tone: builderState.tone,
+      );
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Génération initiale lors de l'arrivée sur l'écran
+    WidgetsBinding.instance.addPostFrameCallback((_) => _generateStory());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_currentTitle == null || _currentContent == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     final builderState = ref.watch(builderProvider);
-    
-    // Génération du contenu (titre et texte) à partir de l'état actuel
-    final title = StoryGenerator.generateTitle(builderState.selectedBlocks);
-    final content = StoryGenerator.generate(
-      selectedBlocks: builderState.selectedBlocks,
-      tone: builderState.tone,
-    );
 
     return Scaffold(
       appBar: AppBar(
@@ -25,12 +50,31 @@ class ReaderScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.copy),
-            tooltip: 'Copier l\'histoire',
+            tooltip: 'Copier',
             onPressed: () {
-              Clipboard.setData(ClipboardData(text: "$title\n\n$content"));
+              Clipboard.setData(ClipboardData(text: "$_currentTitle\n\n$_currentContent"));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Histoire copiée dans le presse-papier !')),
+                const SnackBar(content: Text('Copié !')),
               );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.save),
+            tooltip: 'Sauvegarder',
+            onPressed: () async {
+              final story = Story(
+                title: _currentTitle!,
+                content: _currentContent!,
+                createdAt: DateTime.now(),
+                blocks: builderState.selectedBlocks,
+                tone: builderState.tone,
+              );
+              await ref.read(storiesProvider.notifier).saveStory(story);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Histoire sauvegardée !')),
+                );
+              }
             },
           ),
         ],
@@ -41,7 +85,7 @@ class ReaderScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              _currentTitle!,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.primary,
@@ -49,7 +93,7 @@ class ReaderScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              content,
+              _currentContent!,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     height: 1.6,
                     fontSize: 18,
@@ -62,14 +106,10 @@ class ReaderScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => context.pop(),
                   icon: const Icon(Icons.edit),
-                  label: const Text('Modifier les blocs'),
+                  label: const Text('Modifier'),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    // La régénération se fait en provoquant un rebuild
-                    // (L'état ne change pas, mais le générateur choisit un titre différent aléatoirement)
-                    (context as Element).markNeedsBuild();
-                  },
+                  onPressed: _generateStory,
                   icon: const Icon(Icons.refresh),
                   label: const Text('Régénérer'),
                 ),
