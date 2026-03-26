@@ -54,4 +54,106 @@ Android : flutter build apk ou flutter run sur émulateur/appareil
  Dépendances identifiées (ex: lib QR, permissions).
 
 # StoryBlocks
-application d'histoires creatives
+
+**StoryBlocks** est une application mobile (Flutter) qui permet de **construire des histoires bloc par bloc** : personnage, lieu, objectif, obstacle, twist, fin, ton… puis de générer un texte à lire, copier, et sauvegarder.
+
+> UI en **français**, nom du projet en **anglais**.
+
+---
+
+## Objectifs (MVP)
+
+- Construire une histoire via des **blocs narratifs**
+- **Générer** un texte à partir des choix
+- **Régénérer** une variation
+- **Copier** l’histoire
+- (Optionnel mais recommandé) **Sauvegarder** et retrouver ses histoires dans *Mes histoires* (stockage local)
+
+---
+
+## Fonctionnalités
+
+### Création
+- Sélection de blocs :
+  - Personnage
+  - Lieu
+  - Objectif
+  - Obstacle
+  - Twist (rebondissement)
+  - Fin
+  - Ton (drôle / sombre / poétique / neutre)
+
+### Lecture
+- Affichage du titre + texte généré
+- Actions : **Copier**, **Régénérer**
+- (Optionnel) **Sauvegarder**, **Partager**
+
+### Bibliothèque (local)
+- Liste **Mes histoires**
+- Détail d’une histoire
+- Suppression
+
+---
+
+## Tech stack
+
+- **Flutter** (Android + iOS)
+- **Material 3**
+- (Recommandé) `go_router` pour la navigation
+- (Recommandé) `flutter_riverpod` pour la gestion d’état
+- (Recommandé) `hive` / `hive_flutter` pour la persistance locale
+- (Optionnel) `share_plus` pour le partage
+
+---
+
+## Installation & lancement
+
+### Prérequis
+- Flutter SDK installé
+- Android Studio (et/ou Xcode sur macOS pour iOS)
+- Un émulateur Android ou un appareil physique
+
+### Lancer le projet
+```bash
+flutter pub get
+flutter run
+```
+
+---
+
+## Organisation du projet (suggestion)
+
+- `lib/`
+  - `app/` (routing, thème)
+  - `features/`
+    - `builder/`
+    - `reader/`
+    - `stories/`
+  - `core/`
+    - `models/`
+    - `story_engine/`
+    - `storage/`
+
+---
+
+## Backlog / Suivi
+
+Le backlog est géré via les **Issues GitHub** avec :
+- labels : `P0`, `P1`, `P2`, `ui`, `story-engine`, `storage`, `navigation`, `polish`, `user story`
+- milestone : `MVP-2026-04-04`
+
+---
+
+## Roadmap (date cible)
+
+Objectif : **livraison MVP avant le 2026-04-04**.
+
+1. P0 : Builder + génération + lecture + copie + régénération  
+2. P1 : sauvegarde locale (Hive) + Mes histoires  
+3. P2 : partage, polish UI, animations
+
+---
+
+## Licence
+
+Projet de portfolio / école. Licence à définir (ex: MIT).
