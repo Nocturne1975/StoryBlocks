@@ -16,6 +16,13 @@ class BuilderScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('StoryBlocks'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_stories),
+            tooltip: 'Mes Histoires',
+            onPressed: () => context.push('/stories'),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
