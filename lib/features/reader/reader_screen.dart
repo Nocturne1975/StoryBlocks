@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../core/models/story.dart';
 import '../../core/story_engine/story_generator.dart';
 import '../builder/builder_provider.dart';
@@ -32,7 +33,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   @override
   void initState() {
     super.initState();
-    // Génération initiale lors de l'arrivée sur l'écran
     WidgetsBinding.instance.addPostFrameCallback((_) => _generateStory());
   }
 
@@ -56,6 +56,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Copié !')),
               );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Partager',
+            onPressed: () {
+              Share.share("$_currentTitle\n\n$_currentContent");
             },
           ),
           IconButton(
