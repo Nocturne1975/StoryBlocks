@@ -19,7 +19,7 @@ class Story extends HiveObject {
 
   // Blocs narratifs utilisés
   @HiveField(4)
-  final Map<String, String> blocks; 
+  final Map<String, String> blocks;
 
   @HiveField(5)
   final String tone;

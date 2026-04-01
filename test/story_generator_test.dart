@@ -23,10 +23,7 @@ void main() {
   });
 
   test('La génération de titre doit produire un titre cohérent', () {
-    final selectedBlocks = {
-      'personnage': 'Un chat',
-      'lieu': 'sur la lune',
-    };
+    final selectedBlocks = {'personnage': 'Un chat', 'lieu': 'sur la lune'};
 
     final title = StoryGenerator.generateTitle(selectedBlocks);
     expect(title, isNotEmpty);

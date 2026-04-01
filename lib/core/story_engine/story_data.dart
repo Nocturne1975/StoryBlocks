@@ -44,10 +44,5 @@ class StoryData {
     ],
   };
 
-  static const List<String> tones = [
-    'Drôle',
-    'Sombre',
-    'Poétique',
-    'Neutre',
-  ];
+  static const List<String> tones = ['Drôle', 'Sombre', 'Poétique', 'Neutre'];
 }
