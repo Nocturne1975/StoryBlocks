@@ -25,7 +25,9 @@ class StoriesNotifier extends StateNotifier<List<Story>> {
   }
 }
 
-final storiesProvider = StateNotifierProvider<StoriesNotifier, List<Story>>((ref) {
+final storiesProvider = StateNotifierProvider<StoriesNotifier, List<Story>>((
+  ref,
+) {
   final box = Hive.box<Story>('stories');
   return StoriesNotifier(box);
 });

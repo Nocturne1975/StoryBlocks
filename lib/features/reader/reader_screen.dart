@@ -52,10 +52,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             icon: const Icon(Icons.copy),
             tooltip: 'Copier',
             onPressed: () {
-              Clipboard.setData(ClipboardData(text: "$_currentTitle\n\n$_currentContent"));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Copié !')),
+              Clipboard.setData(
+                ClipboardData(text: "$_currentTitle\n\n$_currentContent"),
               );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Copié !')));
             },
           ),
           IconButton(
@@ -94,17 +96,16 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
             Text(
               _currentTitle!,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 24),
             Text(
               _currentContent!,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    height: 1.6,
-                    fontSize: 18,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(height: 1.6, fontSize: 18),
             ),
             const SizedBox(height: 40),
             Row(

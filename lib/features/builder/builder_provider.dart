@@ -5,15 +5,9 @@ class BuilderState {
   final Map<String, String> selectedBlocks;
   final String tone;
 
-  BuilderState({
-    required this.selectedBlocks,
-    required this.tone,
-  });
+  BuilderState({required this.selectedBlocks, required this.tone});
 
-  BuilderState copyWith({
-    Map<String, String>? selectedBlocks,
-    String? tone,
-  }) {
+  BuilderState copyWith({Map<String, String>? selectedBlocks, String? tone}) {
     return BuilderState(
       selectedBlocks: selectedBlocks ?? this.selectedBlocks,
       tone: tone ?? this.tone,
@@ -36,10 +30,13 @@ class BuilderNotifier extends StateNotifier<BuilderState> {
 
   bool get isComplete {
     // On vérifie si toutes les catégories obligatoires sont remplies
-    return state.selectedBlocks.length >= 6; // personnage, lieu, objectif, obstacle, twist, fin
+    return state.selectedBlocks.length >=
+        6; // personnage, lieu, objectif, obstacle, twist, fin
   }
 }
 
-final builderProvider = StateNotifierProvider<BuilderNotifier, BuilderState>((ref) {
+final builderProvider = StateNotifierProvider<BuilderNotifier, BuilderState>((
+  ref,
+) {
   return BuilderNotifier();
 });
