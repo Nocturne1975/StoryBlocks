@@ -6,10 +6,12 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/models/story.dart';
 import '../../core/story_engine/story_generator.dart';
 import '../builder/builder_provider.dart';
+import '../stories/stories_screen.dart'; // Pour formatStoryDate
 import '../stories/stories_provider.dart';
 
 class ReaderScreen extends ConsumerStatefulWidget {
-  const ReaderScreen({super.key});
+  final String? storyId;
+  const ReaderScreen({super.key, this.storyId});
 
   @override
   ConsumerState<ReaderScreen> createState() => _ReaderScreenState();
@@ -18,6 +20,7 @@ class ReaderScreen extends ConsumerStatefulWidget {
 class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   String? _currentTitle;
   String? _currentContent;
+  DateTime? _createdAt;
 
   void _generateStory() {
     final builderState = ref.read(builderProvider);
@@ -33,7 +36,19 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _generateStory());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.storyId != null) {
+        final stories = ref.read(storiesProvider);
+        final story = stories.firstWhere((s) => s.id == widget.storyId);
+        setState(() {
+          _currentTitle = story.title;
+          _currentContent = story.content;
+          _createdAt = story.createdAt;
+        });
+      } else {
+        _generateStory();
+      }
+    });
   }
 
   @override
@@ -67,25 +82,26 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               Share.share("$_currentTitle\n\n$_currentContent");
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.save),
-            tooltip: 'Sauvegarder',
-            onPressed: () async {
-              final story = Story(
-                title: _currentTitle!,
-                content: _currentContent!,
-                createdAt: DateTime.now(),
-                blocks: builderState.selectedBlocks,
-                tone: builderState.tone,
-              );
-              await ref.read(storiesProvider.notifier).saveStory(story);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Histoire sauvegardée !')),
+          if (widget.storyId == null)
+            IconButton(
+              icon: const Icon(Icons.save),
+              tooltip: 'Sauvegarder',
+              onPressed: () async {
+                final story = Story(
+                  title: _currentTitle!,
+                  content: _currentContent!,
+                  createdAt: DateTime.now(),
+                  blocks: builderState.selectedBlocks,
+                  tone: builderState.tone,
                 );
-              }
-            },
-          ),
+                await ref.read(storiesProvider.notifier).saveStory(story);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Histoire sauvegardée !')),
+                  );
+                }
+              },
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -93,6 +109,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_createdAt != null) ...[
+              Text(
+                formatStoryDate(_createdAt!),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+              ),
+              const SizedBox(height: 8),
+            ],
             Text(
               _currentTitle!,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -116,11 +141,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                   icon: const Icon(Icons.edit),
                   label: const Text('Modifier'),
                 ),
-                ElevatedButton.icon(
-                  onPressed: _generateStory,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Régénérer'),
-                ),
+                if (widget.storyId == null)
+                  ElevatedButton.icon(
+                    onPressed: _generateStory,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Régénérer'),
+                  ),
               ],
             ),
           ],
