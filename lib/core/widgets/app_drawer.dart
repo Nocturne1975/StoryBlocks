@@ -73,8 +73,8 @@ class AppDrawer extends StatelessWidget {
                     onTap: () => context.push('/notifications'),
                   ),
                   _DrawerItem(
-                    icon: Icons.book,
-                    label: 'Bibliothèque',
+                    icon: Icons.menu_book,
+                    label: 'Mes histoires',
                     color: tokens.blockPlace,
                     onTap: () => context.push('/stories'),
                   ),
