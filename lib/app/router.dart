@@ -27,8 +27,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const BuilderScreen(),
       ),
       GoRoute(
-        path: '/reader',
-        builder: (context, state) => const ReaderScreen(),
+        path: '/reader/:storyId?',
+        builder: (context, state) {
+          final storyId = state.pathParameters['storyId'];
+          return ReaderScreen(storyId: storyId);
+        },
       ),
       GoRoute(
         path: '/stories',

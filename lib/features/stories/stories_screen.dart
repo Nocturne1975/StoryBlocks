@@ -48,6 +48,7 @@ class StoriesScreen extends ConsumerWidget {
                 final story = stories[index];
 
                 return _StoryListItem(
+                  id: story.id,
                   title: story.title,
                   date: formatStoryDate(story.createdAt),
                 );
@@ -67,52 +68,62 @@ String formatStoryDate(DateTime createdAt) {
 }
 
 class _StoryListItem extends StatelessWidget {
-  const _StoryListItem({required this.title, required this.date});
+  const _StoryListItem({
+    required this.id,
+    required this.title,
+    required this.date,
+  });
 
+  final String id;
   final String title;
   final String date;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF97316).withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: const Icon(Icons.auto_stories, color: Color(0xFFF97316)),
+    return InkWell(
+      onTap: () => context.push('/reader/$id'),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1F2937),
+        child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF97316).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.auto_stories, color: Color(0xFFF97316)),
           ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Text(
-            date,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1F2937),
+            ),
           ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              date,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+            ),
+          ),
+          trailing: const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
         ),
-        trailing: const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
       ),
     );
   }
