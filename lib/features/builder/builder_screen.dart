@@ -144,8 +144,11 @@ class BuilderScreen extends ConsumerWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ElevatedButton(
-          onPressed: builderNotifier.isComplete
-              ? () => context.push('/reader')
+          onPressed: builderState.selectedBlocks.length >= 6
+              ? () {
+                  ref.read(builderProvider.notifier).generateStory();
+                  context.push('/reader');
+                }
               : null,
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(65),
