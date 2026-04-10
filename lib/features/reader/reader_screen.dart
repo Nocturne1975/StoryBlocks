@@ -89,7 +89,23 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         }
       }
     }
-
+    Future<void> shareStory() async {
+      try {
+        await Share.share(
+          "$_currentTitle\n\n$_currentContent",
+          subject: _currentTitle,
+        );    
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur lors du partage'),
+              backgroundColor: Colors.red,
+            ),
+          );    
+        }
+      }
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Votre Histoire'),
@@ -109,9 +125,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           IconButton(
             icon: const Icon(Icons.share),
             tooltip: 'Partager',
-            onPressed: () {
-              Share.share("$_currentTitle\n\n$_currentContent");
-            },
+            onPressed: shareStory,
           ),
           if (widget.storyId != null)
             IconButton(
