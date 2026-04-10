@@ -44,31 +44,23 @@ class StoriesScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF5),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFFBF5),
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
         title: const Text(
           'Mes histoires',
-          style: TextStyle(
-            color: Color(0xFF1F2937),
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       body: stories.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
                 'Aucune histoire',
-                style: TextStyle(
-                  color: Color(0xFF6B7280),
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
               ),
             )
           : ListView.separated(
@@ -151,34 +143,43 @@ class _StoryListItem extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFFF97316).withValues(alpha: 0.12),
+              color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.auto_stories, color: Color(0xFFF97316)),
+            child: Icon(
+              Icons.auto_stories,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           title: Text(
             title,
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1F2937),
-            ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
               date,
-              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
             ),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Theme.of(context).colorScheme.error,
+                ),
                 onPressed: onDelete,
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ],
           ),
         ),
