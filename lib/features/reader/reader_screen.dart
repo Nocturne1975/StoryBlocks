@@ -29,6 +29,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       _currentContent = StoryGenerator.generate(
         selectedBlocks: builderState.selectedBlocks,
         tone: builderState.tone,
+        length: builderState.storyLength,
       );
     });
   }

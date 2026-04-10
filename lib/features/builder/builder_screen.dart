@@ -61,6 +61,28 @@ class BuilderScreen extends ConsumerWidget {
                           .toList(),
                       onChanged: (val) => builderNotifier.updateTone(val!),
                       decoration: InputDecoration(
+                        labelText: 'Ton',
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildSectionHeader(
+                      "Longueur de l'histoire",
+                      Icons.straighten_rounded,
+                      tokens.blockIdea,
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: builderState.storyLength,
+                      items: ['Courte', 'Moyenne', 'Longue']
+                          .map(
+                            (l) => DropdownMenuItem(value: l, child: Text(l)),
+                          )
+                          .toList(),
+                      onChanged: (val) => builderNotifier.updateLength(val!),
+                      decoration: InputDecoration(
+                        labelText: 'Longueur',
                         filled: true,
                         fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
                       ),

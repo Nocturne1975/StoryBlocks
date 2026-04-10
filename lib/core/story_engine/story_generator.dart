@@ -4,6 +4,7 @@ class StoryGenerator {
   static String generate({
     required Map<String, String> selectedBlocks,
     required String tone,
+    String length = 'Moyenne',
   }) {
     final personnage = selectedBlocks['personnage'] ?? 'Quelqu\'un';
     final lieu = selectedBlocks['lieu'] ?? 'n\'importe où';
@@ -28,7 +29,32 @@ class StoryGenerator {
         intro = "$personnage se trouvait $lieu.";
     }
 
-    return "$intro Sa mission était de $objectif, $obstacle. Soudain, $twist Enfin, $fin";
+    String corps = "Sa mission était de $objectif, $obstacle. Soudain, $twist Enfin, $fin";
+
+    if (length == 'Courte') {
+      return "$intro $corps";
+    } else if (length == 'Longue') {
+      String descriptionLieu = "";
+      switch (lieu.toLowerCase()) {
+        case 'dans l\'espace':
+          descriptionLieu = " Le vide infini s'étendait à perte de vue, parsemé d'étoiles scintillantes comme des diamants oubliés.";
+          break;
+        case 'dans une forêt':
+          descriptionLieu = " Les arbres centenaires murmuraient des secrets anciens tandis que la mousse étouffait le bruit de chaque pas.";
+          break;
+        case 'dans le futur':
+          descriptionLieu = " Les néons survitaminés se reflétaient sur le métal poli des gratte-ciel qui touchaient presque les nuages.";
+          break;
+        default:
+          descriptionLieu = " L'atmosphère de cet endroit était unique, chargée d'une énergie qu'on ne trouve nulle part ailleurs.";
+      }
+
+      String detailsAction = " Le chemin était parsemé d'embûches, mais la détermination de $personnage était inébranlable. Chaque seconde comptait dans cette quête désespérée.";
+      
+      return "$intro$descriptionLieu $corps$detailsAction";
+    }
+
+    return "$intro $corps";
   }
 
   static String generateTitle(Map<String, String> selectedBlocks) {
