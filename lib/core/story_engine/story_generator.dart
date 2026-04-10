@@ -1,7 +1,7 @@
 import 'dart:math';
 
 class StoryGenerator {
-  static String generate({
+  static Map<String, List<String>> generateDetailed({
     required Map<String, String> selectedBlocks,
     required String tone,
     String length = 'Moyenne',
@@ -13,8 +13,7 @@ class StoryGenerator {
     final twist = selectedBlocks['twist'] ?? 'tout était normal';
     final fin = selectedBlocks['fin'] ?? 'l\'histoire se termine.';
 
-    // Variation du texte selon le ton
-    String intro = '';
+    String intro = "";
     switch (tone.toLowerCase()) {
       case 'drôle':
         intro = "Contre toute attente, $personnage se trouvait $lieu.";
@@ -29,32 +28,24 @@ class StoryGenerator {
         intro = "$personnage se trouvait $lieu.";
     }
 
-    String corps = "Sa mission était de $objectif, $obstacle. Soudain, $twist Enfin, $fin";
+    String action = "Sa mission était de $objectif, mais cela devait se faire $obstacle.";
+    String rebondissement = "Soudain, $twist et tout a changé d'un coup !";
+    String conclusion = "Enfin, $fin";
 
-    if (length == 'Courte') {
-      return "$intro $corps";
-    } else if (length == 'Longue') {
-      String descriptionLieu = "";
-      switch (lieu.toLowerCase()) {
-        case 'dans l\'espace':
-          descriptionLieu = " Le vide infini s'étendait à perte de vue, parsemé d'étoiles scintillantes comme des diamants oubliés.";
-          break;
-        case 'dans une forêt':
-          descriptionLieu = " Les arbres centenaires murmuraient des secrets anciens tandis que la mousse étouffait le bruit de chaque pas.";
-          break;
-        case 'dans le futur':
-          descriptionLieu = " Les néons survitaminés se reflétaient sur le métal poli des gratte-ciel qui touchaient presque les nuages.";
-          break;
-        default:
-          descriptionLieu = " L'atmosphère de cet endroit était unique, chargée d'une énergie qu'on ne trouve nulle part ailleurs.";
+    List<String> blocks = [intro, action, rebondissement, conclusion];
+
+    if (length == 'Longue') {
+      String descriptionLieu = "L'atmosphère de cet endroit était unique, chargée d'une énergie particulière.";
+      if (lieu.contains('espace')) {
+        descriptionLieu = "Le vide infini s'étendait à perte de vue, parsemé d'étoiles scintillantes comme des diamants.";
       }
-
-      String detailsAction = " Le chemin était parsemé d'embûches, mais la détermination de $personnage était inébranlable. Chaque seconde comptait dans cette quête désespérée.";
-      
-      return "$intro$descriptionLieu $corps$detailsAction";
+      blocks.insert(1, descriptionLieu);
     }
 
-    return "$intro $corps";
+    return {
+      'title': [generateTitle(selectedBlocks)],
+      'content': blocks,
+    };
   }
 
   static String generateTitle(Map<String, String> selectedBlocks) {

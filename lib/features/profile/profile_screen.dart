@@ -1,13 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/Theme/storyblocks_tokens.dart';
+import 'profile_provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isEditing = false;
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _bioController;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = ref.read(profileProvider);
+    _nameController = TextEditingController(text: profile.name);
+    _emailController = TextEditingController(text: profile.email);
+    _bioController = TextEditingController(text: profile.bio);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _bioController.dispose();
+    super.dispose();
+  }
+
+  void _saveProfile() {
+    ref.read(profileProvider.notifier).updateProfile(
+      name: _nameController.text,
+      email: _emailController.text,
+      bio: _bioController.text,
+    );
+    setState(() => _isEditing = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profil mis à jour !')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.sbTokens;
+    final profile = ref.watch(profileProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF5),
@@ -25,8 +67,17 @@ class ProfileScreen extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Colors.black87),
-            onPressed: () {},
+            icon: Icon(
+              _isEditing ? Icons.check : Icons.edit_outlined,
+              color: _isEditing ? Colors.green : Colors.black87,
+            ),
+            onPressed: () {
+              if (_isEditing) {
+                _saveProfile();
+              } else {
+                setState(() => _isEditing = true);
+              }
+            },
           ),
         ],
       ),
@@ -35,37 +86,25 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- PROFILE HEADER CARD ---
-            _buildProfileHeader(tokens),
+            _buildProfileHeader(tokens, profile),
             const SizedBox(height: 32),
-
-            // --- STATS SECTION ---
             _buildSectionTitle('Mes Statistiques', Icons.trending_up, Colors.orange),
             const SizedBox(height: 16),
-            _StatCard(
+            const _StatCard(
               count: '12',
               label: 'Projets créés',
               icon: Icons.menu_book_rounded,
-              gradient: [const Color(0xFFF97316), const Color(0xFFEA580C)],
+              gradient: [Color(0xFFF97316), Color(0xFFEA580C)],
             ),
             const SizedBox(height: 12),
-            _StatCard(
+            const _StatCard(
               count: '847',
               label: 'Blocs écrits',
               icon: Icons.auto_graph_rounded,
-              gradient: [const Color(0xFFF59E0B), const Color(0xFFD97706)],
-            ),
-            const SizedBox(height: 12),
-            _StatCard(
-              count: '75%',
-              label: 'Objectif mensuel',
-              icon: Icons.track_changes_rounded,
-              gradient: [const Color(0xFFD4A340), const Color(0xFFB38A2D)],
+              gradient: [Color(0xFFF59E0B), Color(0xFFD97706)],
             ),
             const SizedBox(height: 32),
-
-            // --- ACHIEVEMENTS SECTION ---
-            _buildSectionTitle('Mes Réalisations', Icons.emoji_events_outlined, Colors.orange[800]!),
+            _buildSectionTitle('Réalisations', Icons.emoji_events_outlined, Colors.orange[800]!),
             const SizedBox(height: 16),
             GridView.count(
               shrinkWrap: true,
@@ -83,71 +122,22 @@ class ProfileScreen extends StatelessWidget {
                   color: Color(0xFFFCE7F3),
                 ),
                 _AchievementCard(
-                  title: 'Écrivain Prolifique',
-                  description: 'Écrire 500 blocs',
-                  date: '28 Fév 2024',
-                  icon: '✍️',
-                  color: Color(0xFFFEF3C7),
-                ),
-                _AchievementCard(
-                  title: 'Marathonien',
-                  description: 'Écrire 7 jours consécutifs',
-                  date: '10 Mar 2024',
-                  icon: '🏃',
-                  color: Color(0xFFE0F2FE),
-                ),
-                _AchievementCard(
-                  title: 'Architecte Narratif',
+                  title: 'Architecte',
                   description: 'Créer 10 projets',
                   date: '20 Mar 2024',
                   icon: '🏗️',
                   color: Color(0xFFDCFCE7),
                 ),
-                _AchievementCard(
-                  title: 'Maître des Blocs',
-                  description: 'Écrire 1000 blocs',
-                  date: '',
-                  icon: '👑',
-                  color: Color(0xFFF3F4F6),
-                  isLocked: true,
-                ),
-                _AchievementCard(
-                  title: 'Explorateur',
-                  description: 'Utiliser tous les types de blocs',
-                  date: '',
-                  icon: '🗺️',
-                  color: Color(0xFFF3F4F6),
-                  isLocked: true,
-                ),
               ],
             ),
             const SizedBox(height: 32),
-
-            // --- LOGOUT BUTTON ---
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.logout),
-                label: const Text('Se déconnecter'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF4444),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(StoryBlocksTokens tokens) {
+  Widget _buildProfileHeader(StoryBlocksTokens tokens, UserProfile profile) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -175,48 +165,86 @@ class ProfileScreen extends StatelessWidget {
           ),
           Transform.translate(
             offset: const Offset(0, -40),
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  radius: 45,
-                  backgroundColor: Colors.white,
-                  child: CircleAvatar(
-                    radius: 42,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=sophie'),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 45,
+                    backgroundColor: Colors.white,
+                    child: CircleAvatar(
+                      radius: 42,
+                      backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=user'),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Sophie Martin',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.email_outlined, size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text('sophie.martin@email.com', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text('Membre depuis Janvier 2024', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                  ],
-                ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(24, 16, 24, 24),
-                  child: Text(
-                    'Écrivaine passionnée de fantasy et science-fiction. J\'aime créer des mondes riches et des personnages complexes.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFF4B5563), height: 1.5),
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  if (_isEditing)
+                    TextField(
+                      controller: _nameController,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(hintText: 'Votre nom'),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    )
+                  else
+                    Text(
+                      profile.name,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+                    ),
+                  const SizedBox(height: 12),
+                  if (_isEditing)
+                    TextField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.email_outlined),
+                        hintText: 'Email',
+                      ),
+                    )
+                  else
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.email_outlined, size: 14, color: Colors.grey[600]),
+                        const SizedBox(width: 4),
+                        Text(profile.email, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                      ],
+                    ),
+                  const SizedBox(height: 12),
+                  if (_isEditing)
+                    TextField(
+                      controller: _bioController,
+                      maxLines: 3,
+                      decoration: const InputDecoration(
+                        hintText: 'Votre bio...',
+                        border: OutlineInputBorder(),
+                      ),
+                    )
+                  else
+                    Text(
+                      profile.bio,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Color(0xFF4B5563), height: 1.5),
+                    ),
+                  const SizedBox(height: 24),
+                  if (_isEditing)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _saveProfile,
+                        icon: const Icon(Icons.save),
+                        label: const Text('ENREGISTRER LE PROFIL'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: tokens.blockIdea,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ],
@@ -300,9 +328,6 @@ class _AchievementCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.orange.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -310,38 +335,19 @@ class _AchievementCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            child: Opacity(
-              opacity: isLocked ? 0.3 : 1.0,
-              child: Text(icon, style: const TextStyle(fontSize: 24)),
-            ),
+            child: Text(icon, style: const TextStyle(fontSize: 24)),
           ),
           const SizedBox(height: 8),
           Text(
             title,
             textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: isLocked ? Colors.grey : const Color(0xFF374151),
-            ),
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 2),
           Text(
             description,
             textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 10, color: Colors.grey[600]),
           ),
-          if (date.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              date,
-              style: const TextStyle(fontSize: 10, color: Colors.orange, fontWeight: FontWeight.bold),
-            ),
-          ],
         ],
       ),
     );

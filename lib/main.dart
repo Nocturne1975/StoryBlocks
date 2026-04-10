@@ -16,8 +16,9 @@ void main() async {
     Hive.registerAdapter(StoryAdapter());
   }
 
-  // Ouverture de la boîte pour stocker les histoires
+  // Ouverture des boîtes Hive
   await Hive.openBox<Story>('stories');
+  await Hive.openBox('settings'); // Pour le profil et les préférences
 
   runApp(const ProviderScope(child: StoryBlocksApp()));
 }

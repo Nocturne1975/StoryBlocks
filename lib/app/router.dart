@@ -28,13 +28,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const BuilderScreen(),
       ),
       GoRoute(
-        path: '/reader/:storyId?',
+        path: '/reader',
+        builder: (context, state) => const ReaderScreen(),
+      ),
+      GoRoute(
+        path: '/reader/:storyId',
         pageBuilder: (context, state) {
           final storyId = state.pathParameters['storyId'];
           return CustomTransitionPage(
             key: state.pageKey,
             child: ReaderScreen(storyId: storyId),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
               return FadeTransition(
                 opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
                 child: SlideTransition(
