@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/models/story.dart';
 import '../../core/story_engine/story_generator.dart';
+import '../../core/utils/date_formatter.dart';
 import '../builder/builder_provider.dart';
-import '../stories/stories_screen.dart'; // Pour formatStoryDate
 import '../stories/stories_provider.dart';
 
 class ReaderScreen extends ConsumerStatefulWidget {
@@ -59,6 +59,37 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
     final builderState = ref.watch(builderProvider);
 
+    Future<void> confirmDelete() async {
+      final bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Supprimer l\'histoire'),
+          content: Text('Êtes-vous sûr de vouloir supprimer "$_currentTitle" ?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Supprimer'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true && widget.storyId != null) {
+        await ref.read(storiesProvider.notifier).deleteStory(widget.storyId!);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Histoire supprimée')),
+          );
+          context.pop();
+        }
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Votre Histoire'),
@@ -82,6 +113,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               Share.share("$_currentTitle\n\n$_currentContent");
             },
           ),
+          if (widget.storyId != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Supprimer',
+              onPressed: confirmDelete,
+            ),
           if (widget.storyId == null)
             IconButton(
               icon: const Icon(Icons.save),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
+import '../../core/utils/date_formatter.dart';
 import 'stories_provider.dart';
 
 class StoriesScreen extends ConsumerWidget {
@@ -11,6 +11,37 @@ class StoriesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stories = ref.watch(storiesProvider);
+
+    Future<bool> showConfirmDialog(String title) async {
+      return await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Supprimer l\'histoire'),
+              content: Text('Êtes-vous sûr de vouloir supprimer "$title" ?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Annuler'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Supprimer'),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+    }
+
+    Future<void> deleteStory(String id) async {
+      await ref.read(storiesProvider.notifier).deleteStory(id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Histoire supprimée')),
+        );
+      }
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF5),
@@ -47,10 +78,30 @@ class StoriesScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final story = stories[index];
 
-                return _StoryListItem(
-                  id: story.id,
-                  title: story.title,
-                  date: formatStoryDate(story.createdAt),
+                return Dismissible(
+                  key: Key(story.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) => showConfirmDialog(story.title),
+                  onDismissed: (direction) => deleteStory(story.id),
+                  child: _StoryListItem(
+                    id: story.id,
+                    title: story.title,
+                    date: formatStoryDate(story.createdAt),
+                    onDelete: () async {
+                      if (await showConfirmDialog(story.title)) {
+                        deleteStory(story.id);
+                      }
+                    },
+                  ),
                 );
               },
             ),
@@ -63,20 +114,18 @@ class StoriesScreen extends ConsumerWidget {
   }
 }
 
-String formatStoryDate(DateTime createdAt) {
-  return DateFormat('dd/MM/yyyy').format(createdAt);
-}
-
 class _StoryListItem extends StatelessWidget {
   const _StoryListItem({
     required this.id,
     required this.title,
     required this.date,
+    required this.onDelete,
   });
 
   final String id;
   final String title;
   final String date;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +171,16 @@ class _StoryListItem extends StatelessWidget {
               style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
             ),
           ),
-          trailing: const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                onPressed: onDelete,
+              ),
+              const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
+            ],
+          ),
         ),
       ),
     );
