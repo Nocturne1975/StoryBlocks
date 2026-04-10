@@ -4,19 +4,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class BuilderState {
   final Map<String, String> selectedBlocks;
   final String tone;
+  final String storyLength;
 
-  BuilderState({required this.selectedBlocks, required this.tone});
+  BuilderState({
+    required this.selectedBlocks,
+    required this.tone,
+    required this.storyLength,
+  });
 
-  BuilderState copyWith({Map<String, String>? selectedBlocks, String? tone}) {
+  BuilderState copyWith({
+    Map<String, String>? selectedBlocks,
+    String? tone,
+    String? storyLength,
+  }) {
     return BuilderState(
       selectedBlocks: selectedBlocks ?? this.selectedBlocks,
       tone: tone ?? this.tone,
+      storyLength: storyLength ?? this.storyLength,
     );
   }
 }
 
 class BuilderNotifier extends StateNotifier<BuilderState> {
-  BuilderNotifier() : super(BuilderState(selectedBlocks: {}, tone: 'Neutre'));
+  BuilderNotifier()
+    : super(
+        BuilderState(selectedBlocks: {}, tone: 'Neutre', storyLength: 'Moyenne'),
+      );
 
   void updateBlock(String category, String value) {
     final newBlocks = Map<String, String>.from(state.selectedBlocks);
@@ -26,6 +39,10 @@ class BuilderNotifier extends StateNotifier<BuilderState> {
 
   void updateTone(String newTone) {
     state = state.copyWith(tone: newTone);
+  }
+
+  void updateLength(String newLength) {
+    state = state.copyWith(storyLength: newLength);
   }
 
   bool get isComplete {
