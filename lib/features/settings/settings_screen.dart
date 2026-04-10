@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../app/Theme/storyblocks_tokens.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -139,19 +140,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 24),
 
-            // --- AIDE ---
+            // --- AIDE & LÉGAL ---
+            _buildSectionTitle(Icons.info_outline, 'Aide & Légal'),
+            const SizedBox(height: 12),
             _buildSettingsCard(
-              child: _buildActionTile(
-                icon: Icons.help_outline,
-                iconColor: Colors.amber[600]!,
-                title: 'Centre d\'aide',
-                subtitle: 'Tutoriels et support',
-                trailing: const Icon(
-                  Icons.arrow_forward,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-                onTap: () {},
+              child: Column(
+                children: [
+                  _buildActionTile(
+                    icon: Icons.help_outline,
+                    iconColor: Colors.amber[600]!,
+                    title: 'Centre d\'aide',
+                    subtitle: 'Tutoriels et support',
+                    trailing: const Icon(
+                      Icons.arrow_forward,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    onTap: () {},
+                  ),
+                  const Divider(height: 1, indent: 70),
+                  _buildActionTile(
+                    icon: Icons.privacy_tip_outlined,
+                    iconColor: Colors.blue[600]!,
+                    title: 'Confidentialité',
+                    subtitle: 'Politique de gestion des données',
+                    trailing: const Icon(
+                      Icons.open_in_new,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    onTap: () async {
+                      final Uri url = Uri.parse(
+                        'https://github.com/Nocturne1975/StoryBlocks/blob/main/docs/privacy.md',
+                      );
+                      if (!await launchUrl(url)) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Impossible d\'ouvrir le lien'),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 40),
