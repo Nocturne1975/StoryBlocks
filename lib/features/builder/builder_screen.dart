@@ -25,11 +25,14 @@ class BuilderScreen extends ConsumerWidget {
         elevation: 0,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFF7ED), Color(0xFFFAF7F2)],
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
+              Theme.of(context).colorScheme.surface,
+            ],
           ),
         ),
         child: SafeArea(
@@ -59,11 +62,7 @@ class BuilderScreen extends ConsumerWidget {
                       onChanged: (val) => builderNotifier.updateTone(val!),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white.withAlpha(204),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
+                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -193,11 +192,15 @@ class _CategoryCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(230),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: color.withAlpha(40),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: color.withAlpha(26),
+            color: color.withAlpha(15),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -221,10 +224,10 @@ class _CategoryCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   category.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 16,
-                    color: Color(0xFF3A2F28),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -245,10 +248,10 @@ class _CategoryCard extends StatelessWidget {
                     label: Text(option),
                     selected: isSelected,
                     onSelected: (_) => onSelected(option),
-                    backgroundColor: Colors.grey[50],
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
                     selectedColor: color.withAlpha(51),
                     labelStyle: TextStyle(
-                      color: isSelected ? color : Colors.black87,
+                      color: isSelected ? color : Theme.of(context).colorScheme.onSurface,
                       fontWeight: isSelected
                           ? FontWeight.bold
                           : FontWeight.normal,
