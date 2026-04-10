@@ -53,6 +53,57 @@ class StoriesScreen extends ConsumerWidget {
           'Mes histoires',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.sort_by_alpha),
+            tooltip: 'Trier par titre / date',
+            onPressed: () => ref.read(storiesProvider.notifier).toggleSort(),
+          ),
+          if (stories.isNotEmpty)
+            PopupMenuButton<String>(
+              onSelected: (value) async {
+                if (value == 'clear') {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Tout supprimer'),
+                      content: const Text(
+                        'Voulez-vous vraiment supprimer toutes vos histoires ? Cette action est irréversible.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Annuler'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.red,
+                          ),
+                          child: const Text('Tout supprimer'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmed == true) {
+                    await ref.read(storiesProvider.notifier).clearAll();
+                  }
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'clear',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_sweep, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Tout supprimer', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
       body: stories.isEmpty
           ? Center(
