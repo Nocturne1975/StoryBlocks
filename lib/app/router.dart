@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/welcome/welcome_screen.dart';
@@ -28,9 +29,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/reader/:storyId?',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final storyId = state.pathParameters['storyId'];
-          return ReaderScreen(storyId: storyId);
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ReaderScreen(storyId: storyId),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.05),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+          );
         },
       ),
       GoRoute(

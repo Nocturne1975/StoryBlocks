@@ -244,23 +244,31 @@ class _CategoryCard extends StatelessWidget {
                 final isSelected = selectedValue == option;
                 return Padding(
                   padding: const EdgeInsets.only(right: 10),
-                  child: ChoiceChip(
-                    label: Text(option),
-                    selected: isSelected,
-                    onSelected: (_) => onSelected(option),
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
-                    selectedColor: color.withAlpha(51),
-                    labelStyle: TextStyle(
-                      color: isSelected ? color : Theme.of(context).colorScheme.onSurface,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      side: BorderSide(
-                        color: isSelected ? color : Colors.transparent,
-                        width: 2,
+                  child: AnimatedScale(
+                    scale: isSelected ? 1.05 : 1.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: ChoiceChip(
+                      label: Text(option),
+                      selected: isSelected,
+                      onSelected: (_) => onSelected(option),
+                      backgroundColor: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withAlpha(100),
+                      selectedColor: color.withAlpha(51),
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? color
+                            : Theme.of(context).colorScheme.onSurface,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        side: BorderSide(
+                          color: isSelected ? color : Colors.transparent,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
