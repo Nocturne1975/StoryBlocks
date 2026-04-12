@@ -149,6 +149,7 @@ class _DashboardContent extends ConsumerWidget {
                           ),
                         ),
                         _NewProjectButton(
+                          label: 'L\'Atelier',
                           onTap: () => context.push('/builder'),
                         ),
                       ],
@@ -274,15 +275,16 @@ class _HeaderButton extends StatelessWidget {
 }
 
 class _NewProjectButton extends StatelessWidget {
+  final String label;
   final VoidCallback onTap;
-  const _NewProjectButton({required this.onTap});
+  const _NewProjectButton({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: onTap,
-      icon: const Icon(Icons.add, size: 18),
-      label: const Text('Nouveau'),
+      icon: const Icon(Icons.bolt, size: 18),
+      label: Text(label),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.orange[600],
         foregroundColor: Colors.white,

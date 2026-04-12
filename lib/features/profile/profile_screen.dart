@@ -128,7 +128,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   icon: '🏗️',
                   color: Color(0xFFDCFCE7),
                 ),
-                const _AchievementCard(
+                _AchievementCard(
                   title: 'Maître des Blocs',
                   description: 'Écrire 1000 blocs',
                   date: '',

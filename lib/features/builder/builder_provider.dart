@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/models/story.dart';
 import '../../core/story_engine/story_generator.dart';
+import '../stories/stories_provider.dart';
 
 class BuilderState {
   final Map<String, String> selectedBlocks;
   final String tone;
   final String storyLength;
-  final Story? generatedStory; // Nouveau champ
+  final Story? generatedStory;
 
   BuilderState({
     required this.selectedBlocks,
@@ -31,7 +32,9 @@ class BuilderState {
 }
 
 class BuilderNotifier extends StateNotifier<BuilderState> {
-  BuilderNotifier()
+  final StoriesNotifier _storiesNotifier;
+
+  BuilderNotifier(this._storiesNotifier)
     : super(
         BuilderState(selectedBlocks: {}, tone: 'Neutre', storyLength: 'Moyenne'),
       );
@@ -50,8 +53,8 @@ class BuilderNotifier extends StateNotifier<BuilderState> {
     state = state.copyWith(storyLength: newLength);
   }
 
-  // Nouvelle méthode pour générer l'histoire
-  void generateStory() {
+  // Faire "danser" les idées et créer l'histoire
+  Future<void> generateStory() async {
     final result = StoryGenerator.generateDetailed(
       selectedBlocks: state.selectedBlocks,
       tone: state.tone,
@@ -60,12 +63,15 @@ class BuilderNotifier extends StateNotifier<BuilderState> {
 
     final newStory = Story(
       title: result['title']!.first,
-      content: result['content']!.join(' '),
+      content: result['content']!.join('\n\n'),
       createdAt: DateTime.now(),
-      blocks: state.selectedBlocks,
-      tone: state.tone,
+      blocks: state.selectedBlocks, // On sauvegarde les choix (Map)
+      tone: state.tone,             // Le ton est maintenant fourni
     );
 
+    // Sauvegarde immédiate dans "Mes Projets"
+    await _storiesNotifier.saveStory(newStory);
+    
     state = state.copyWith(generatedStory: newStory);
   }
 
@@ -74,8 +80,6 @@ class BuilderNotifier extends StateNotifier<BuilderState> {
   }
 }
 
-final builderProvider = StateNotifierProvider<BuilderNotifier, BuilderState>((
-  ref,
-) {
-  return BuilderNotifier();
+final builderProvider = StateNotifierProvider<BuilderNotifier, BuilderState>((ref) {
+  return BuilderNotifier(ref.watch(storiesProvider.notifier));
 });

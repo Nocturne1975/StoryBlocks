@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/story_engine/story_data.dart';
 import '../../app/Theme/storyblocks_tokens.dart';
+import '../ideas/idea_provider.dart';
 import 'builder_provider.dart';
 
 class BuilderScreen extends ConsumerWidget {
@@ -18,7 +19,7 @@ class BuilderScreen extends ConsumerWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
-          'Créateur d\'Histoires',
+          'AMUSONS-NOUS',
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         backgroundColor: Colors.transparent,
@@ -38,6 +39,15 @@ class BuilderScreen extends ConsumerWidget {
         child: SafeArea(
           child: Column(
             children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Fais "danser" tes idées ensemble pour trouver l\'inspiration !',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 10),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(
@@ -90,9 +100,21 @@ class BuilderScreen extends ConsumerWidget {
                     const SizedBox(height: 30),
 
                     ...StoryData.blocks.keys.map((category) {
-                      final selectedValue =
-                          builderState.selectedBlocks[category];
-                      final options = StoryData.blocks[category]!;
+                      final selectedValue = builderState.selectedBlocks[category];
+                      
+                      // ON RÉCUPÈRE TES IDÉES DU COFFRE
+                      final myIdeas = ref.watch(ideaProvider);
+                      
+                      // On filtre tes idées par catégorie (ex: Personnage, Lieu)
+                      // Si l'utilisateur n'a pas encore d'idées, on garde les idées par défaut
+                      final myFilteredIdeas = myIdeas
+                          .where((i) => i.category.toLowerCase().contains(category.toLowerCase()))
+                          .map((i) => i.content)
+                          .toList();
+                          
+                      final options = myFilteredIdeas.isNotEmpty 
+                          ? myFilteredIdeas 
+                          : StoryData.blocks[category]!;
 
                       Color categoryColor;
                       IconData categoryIcon;
@@ -166,7 +188,7 @@ class BuilderScreen extends ConsumerWidget {
               Icon(Icons.auto_fix_high_rounded),
               SizedBox(width: 12),
               Text(
-                'GÉNÉRER L\'HISTOIRE',
+                'FAIRE DANSER LES IDÉES',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
               ),
             ],
