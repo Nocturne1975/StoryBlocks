@@ -113,6 +113,7 @@ class _DashboardContent extends ConsumerWidget {
                               Color(0xFFEA580C),
                             ],
                             icon: Icons.layers,
+                            onTap: () => context.push('/stories'),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -125,6 +126,7 @@ class _DashboardContent extends ConsumerWidget {
                               Color(0xFFEAB308),
                             ],
                             icon: Icons.access_time,
+                            onTap: () => context.push('/ideas'),
                           ),
                         ),
                       ],
@@ -149,7 +151,8 @@ class _DashboardContent extends ConsumerWidget {
                           ),
                         ),
                         _NewProjectButton(
-                          onTap: () => context.push('/builder'),
+                          label: 'L\'Atelier',
+                          onTap: () => context.push('/workshop'),
                         ),
                       ],
                     ),
@@ -220,26 +223,33 @@ class _LogoSimple extends StatelessWidget {
   const _LogoSimple();
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          'assets/images/logosb.png',
-          height: 32,
-          errorBuilder: (context, error, stackTrace) =>
-              const Icon(Icons.auto_stories, color: Colors.orange, size: 32),
+    return InkWell(
+      onTap: () => context.go('/'),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/logosb.png',
+              height: 32,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.auto_stories, color: Colors.orange, size: 32),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'StoryBlocks',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: Colors.orange[800],
+                letterSpacing: -1,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Text(
-          'StoryBlocks',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w900,
-            color: Colors.orange[800],
-            letterSpacing: -1,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -273,23 +283,108 @@ class _HeaderButton extends StatelessWidget {
   }
 }
 
-class _NewProjectButton extends StatelessWidget {
+class _InteractiveWrapper extends StatefulWidget {
+  final Widget child;
   final VoidCallback onTap;
-  const _NewProjectButton({required this.onTap});
+  final double scaleAmount;
+  final bool vibrate;
+
+  const _InteractiveWrapper({
+    required this.child,
+    required this.onTap,
+    this.scaleAmount = 1.1,
+    this.vibrate = false,
+  });
+
+  @override
+  State<_InteractiveWrapper> createState() => _InteractiveWrapperState();
+}
+
+class _InteractiveWrapperState extends State<_InteractiveWrapper>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+  late Animation<double> _vibrate;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scale = Tween<double>(begin: 1.0, end: widget.scaleAmount).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _vibrate = Tween<double>(begin: -0.05, end: 0.05).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.linear),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handle(bool active) {
+    if (active) {
+      widget.vibrate ? _controller.repeat(reverse: true) : _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onTap,
-      icon: const Icon(Icons.add, size: 18),
-      label: const Text('Nouveau'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange[600],
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shadowColor: Colors.orange.withValues(alpha: 0.5),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    return MouseRegion(
+      onEnter: (_) => _handle(true),
+      onExit: (_) => _handle(false),
+      child: GestureDetector(
+        onTapDown: (_) => _handle(true),
+        onTapUp: (_) => _handle(false),
+        onTapCancel: () => _handle(false),
+        onTap: () async {
+          _handle(true);
+          await Future.delayed(const Duration(milliseconds: 80));
+          widget.onTap();
+        },
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            Widget result = Transform.scale(scale: _scale.value, child: widget.child);
+            if (widget.vibrate) {
+              result = Transform.rotate(angle: _vibrate.value, child: result);
+            }
+            return result;
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _NewProjectButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _NewProjectButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return _InteractiveWrapper(
+      onTap: onTap,
+      vibrate: true,
+      child: ElevatedButton.icon(
+        onPressed: null,
+        icon: const Icon(Icons.bolt, size: 20, color: Colors.yellow),
+        label: Text(label, style: const TextStyle(fontWeight: FontWeight.w900)),
+        style: ElevatedButton.styleFrom(
+          disabledBackgroundColor: Colors.orange[700],
+          disabledForegroundColor: Colors.white,
+          elevation: 6,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
       ),
     );
   }
@@ -300,60 +395,66 @@ class _StatCard extends StatelessWidget {
   final String label;
   final List<Color> gradient;
   final IconData icon;
+  final VoidCallback onTap;
 
   const _StatCard({
     required this.count,
     required this.label,
     required this.gradient,
     required this.icon,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradient,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: gradient[0].withValues(alpha: 0.4),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+    return _InteractiveWrapper(
+      onTap: onTap,
+      scaleAmount: 1.05,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradient,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 28),
-              Text(
-                count,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: gradient[0].withValues(alpha: 0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 28),
+                Text(
+                  count,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -29,12 +29,10 @@ class ReaderScreen extends ConsumerWidget {
       );
     }
 
-    // Découper le contenu en blocs pour l'effet de cascade
-    // Si l'histoire a été générée avec le nouveau générateur, elle aura peut-être déjà des délimiteurs
-    // Sinon on découpe par phrases ou par points pour simuler des blocs.
+    // Découper le contenu par paragraphes (sauts de ligne)
     final List<String> storyBlocks = story.content
-        .split(RegExp(r'(?<=[.!?])\s+'))
-        .where((s) => s.isNotEmpty)
+        .split('\n')
+        .where((s) => s.trim().isNotEmpty)
         .toList();
 
     return Scaffold(
@@ -51,6 +49,12 @@ class ReaderScreen extends ConsumerWidget {
           style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
         actions: [
+          if (storyId != null) // On peut modifier seulement si l'histoire est déjà enregistrée
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, color: Colors.black87),
+              tooltip: 'Modifier l\'histoire',
+              onPressed: () => context.push('/editor/$storyId'),
+            ),
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.black87),
             onPressed: () => ref.read(storiesProvider.notifier).shareStory(story),

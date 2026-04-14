@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/story_engine/story_data.dart';
 import '../../app/Theme/storyblocks_tokens.dart';
+import '../ideas/idea_provider.dart';
 import 'builder_provider.dart';
 
 class BuilderScreen extends ConsumerWidget {
@@ -18,11 +19,19 @@ class BuilderScreen extends ConsumerWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
-          'Créateur d\'Histoires',
+          'AMUSONS-NOUS',
           style: TextStyle(fontWeight: FontWeight.w900),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.casino_outlined, color: Colors.black87),
+            tooltip: 'Tout piger au hasard',
+            onPressed: () => builderNotifier.randomizeAll(),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -38,6 +47,15 @@ class BuilderScreen extends ConsumerWidget {
         child: SafeArea(
           child: Column(
             children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Fais "danser" tes idées ensemble pour trouver l\'inspiration !',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 10),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(
@@ -52,19 +70,31 @@ class BuilderScreen extends ConsumerWidget {
                       tokens.blockTheme,
                     ),
                     const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      initialValue: builderState.tone,
-                      items: StoryData.tones
-                          .map(
-                            (t) => DropdownMenuItem(value: t, child: Text(t)),
-                          )
-                          .toList(),
-                      onChanged: (val) => builderNotifier.updateTone(val!),
-                      decoration: InputDecoration(
-                        labelText: 'Ton',
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
-                      ),
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final myIdeas = ref.watch(ideaProvider);
+                        final myTones = myIdeas
+                            .where((i) => i.category.toLowerCase() == 'ton')
+                            .map((i) => i.content)
+                            .toList();
+                        
+                        final allTones = {...StoryData.tones, ...myTones}.toList();
+
+                        return DropdownButtonFormField<String>(
+                          initialValue: builderState.tone,
+                          items: allTones
+                              .map(
+                                (t) => DropdownMenuItem(value: t, child: Text(t)),
+                              )
+                              .toList(),
+                          onChanged: (val) => builderNotifier.updateTone(val!),
+                          decoration: InputDecoration(
+                            labelText: 'Ton',
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
                     _buildSectionHeader(
@@ -90,9 +120,16 @@ class BuilderScreen extends ConsumerWidget {
                     const SizedBox(height: 30),
 
                     ...StoryData.blocks.keys.map((category) {
-                      final selectedValue =
-                          builderState.selectedBlocks[category];
-                      final options = StoryData.blocks[category]!;
+                      final selectedValue = builderState.selectedBlocks[category];
+                      final myIdeas = ref.watch(ideaProvider);
+                      final myFilteredIdeas = myIdeas
+                          .where((i) => i.category.toLowerCase().contains(category.toLowerCase()))
+                          .map((i) => i.content)
+                          .toList();
+                          
+                      final options = myFilteredIdeas.isNotEmpty 
+                          ? myFilteredIdeas 
+                          : StoryData.blocks[category]!;
 
                       Color categoryColor;
                       IconData categoryIcon;
@@ -144,8 +181,11 @@ class BuilderScreen extends ConsumerWidget {
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ElevatedButton(
-          onPressed: builderNotifier.isComplete
-              ? () => context.push('/reader')
+          onPressed: builderState.selectedBlocks.length >= 6
+              ? () {
+                  builderNotifier.generateStory();
+                  context.push('/reader');
+                }
               : null,
           style: ElevatedButton.styleFrom(
             minimumSize: const Size.fromHeight(65),
@@ -163,7 +203,7 @@ class BuilderScreen extends ConsumerWidget {
               Icon(Icons.auto_fix_high_rounded),
               SizedBox(width: 12),
               Text(
-                'GÉNÉRER L\'HISTOIRE',
+                'FAIRE DANSER LES IDÉES',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
               ),
             ],

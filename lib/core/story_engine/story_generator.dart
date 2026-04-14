@@ -1,6 +1,20 @@
 import 'dart:math';
 
 class StoryGenerator {
+  // Ancienne méthode restaurée pour la compatibilité
+  static String generate({
+    required Map<String, String> selectedBlocks,
+    required String tone,
+    String length = 'Moyenne',
+  }) {
+    final result = generateDetailed(
+      selectedBlocks: selectedBlocks,
+      tone: tone,
+      length: length,
+    );
+    return (result['content'] as List<String>).join(' ');
+  }
+
   static Map<String, List<String>> generateDetailed({
     required Map<String, String> selectedBlocks,
     required String tone,
