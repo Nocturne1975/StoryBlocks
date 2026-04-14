@@ -13,6 +13,8 @@ import '../features/stats/stats_screen.dart';
 import '../features/ideas/ideas_screen.dart';
 import '../features/collaboration/collaboration_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/editor/editor_screen.dart';
+import '../features/workshop/workshop_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -83,6 +85,21 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/workshop',
+        builder: (context, state) => const WorkshopScreen(),
+      ),
+      GoRoute(
+        path: '/editor',
+        builder: (context, state) => const EditorScreen(),
+      ),
+      GoRoute(
+        path: '/editor/:storyId',
+        builder: (context, state) {
+          final storyId = state.pathParameters['storyId'];
+          return EditorScreen(storyId: storyId);
+        },
       ),
     ],
   );

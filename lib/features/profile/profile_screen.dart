@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/Theme/storyblocks_tokens.dart';
+import '../stories/stories_provider.dart';
 import 'profile_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -50,6 +51,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final tokens = context.sbTokens;
     final profile = ref.watch(profileProvider);
+    final stories = ref.watch(storiesProvider);
+
+    int totalBlocks = 0;
+    for (var s in stories) {
+      totalBlocks += s.blocks.length;
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFBF5),
@@ -90,18 +97,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 32),
             _buildSectionTitle('Mes Statistiques', Icons.trending_up, Colors.orange),
             const SizedBox(height: 16),
-            const _StatCard(
-              count: '12',
+            _StatCard(
+              count: stories.length.toString(),
               label: 'Projets créés',
               icon: Icons.menu_book_rounded,
-              gradient: [Color(0xFFF97316), Color(0xFFEA580C)],
+              gradient: const [Color(0xFFF97316), Color(0xFFEA580C)],
             ),
             const SizedBox(height: 12),
-            const _StatCard(
-              count: '847',
+            _StatCard(
+              count: totalBlocks.toString(),
               label: 'Blocs écrits',
               icon: Icons.auto_graph_rounded,
-              gradient: [Color(0xFFF59E0B), Color(0xFFD97706)],
+              gradient: const [Color(0xFFF59E0B), Color(0xFFD97706)],
             ),
             const SizedBox(height: 32),
             _buildSectionTitle('Réalisations', Icons.emoji_events_outlined, Colors.orange[800]!),

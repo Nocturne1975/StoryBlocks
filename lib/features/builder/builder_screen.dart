@@ -24,6 +24,14 @@ class BuilderScreen extends ConsumerWidget {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.casino_outlined, color: Colors.black87),
+            tooltip: 'Tout piger au hasard',
+            onPressed: () => builderNotifier.randomizeAll(),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -62,19 +70,31 @@ class BuilderScreen extends ConsumerWidget {
                       tokens.blockTheme,
                     ),
                     const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      initialValue: builderState.tone,
-                      items: StoryData.tones
-                          .map(
-                            (t) => DropdownMenuItem(value: t, child: Text(t)),
-                          )
-                          .toList(),
-                      onChanged: (val) => builderNotifier.updateTone(val!),
-                      decoration: InputDecoration(
-                        labelText: 'Ton',
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
-                      ),
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final myIdeas = ref.watch(ideaProvider);
+                        final myTones = myIdeas
+                            .where((i) => i.category.toLowerCase() == 'ton')
+                            .map((i) => i.content)
+                            .toList();
+                        
+                        final allTones = {...StoryData.tones, ...myTones}.toList();
+
+                        return DropdownButtonFormField<String>(
+                          initialValue: builderState.tone,
+                          items: allTones
+                              .map(
+                                (t) => DropdownMenuItem(value: t, child: Text(t)),
+                              )
+                              .toList(),
+                          onChanged: (val) => builderNotifier.updateTone(val!),
+                          decoration: InputDecoration(
+                            labelText: 'Ton',
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(100),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
                     _buildSectionHeader(
@@ -101,12 +121,7 @@ class BuilderScreen extends ConsumerWidget {
 
                     ...StoryData.blocks.keys.map((category) {
                       final selectedValue = builderState.selectedBlocks[category];
-                      
-                      // ON RÉCUPÈRE TES IDÉES DU COFFRE
                       final myIdeas = ref.watch(ideaProvider);
-                      
-                      // On filtre tes idées par catégorie (ex: Personnage, Lieu)
-                      // Si l'utilisateur n'a pas encore d'idées, on garde les idées par défaut
                       final myFilteredIdeas = myIdeas
                           .where((i) => i.category.toLowerCase().contains(category.toLowerCase()))
                           .map((i) => i.content)
@@ -168,7 +183,7 @@ class BuilderScreen extends ConsumerWidget {
         child: ElevatedButton(
           onPressed: builderState.selectedBlocks.length >= 6
               ? () {
-                  ref.read(builderProvider.notifier).generateStory();
+                  builderNotifier.generateStory();
                   context.push('/reader');
                 }
               : null,
